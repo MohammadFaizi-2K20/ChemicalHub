@@ -1,0 +1,402 @@
+#include<iostream>
+#include<string.h>
+#include<conio.h>
+#include<fstream>
+using namespace std;
+
+int i,n;
+ifstream fin;
+ofstream fout;
+fstream fio;
+void disp();
+
+class chem
+{
+		char name[20],pass[15];
+	float pr; int quant;
+
+public:
+	void get();
+	void get2();
+	void show();
+    int stchk(char nm[30]);    
+    void purchase(int qty);
+    void refil(int qty);
+}c;
+
+
+void chem::purchase(int qty)
+{
+	if(quant>=qty)
+	{
+		quant-=qty;
+		cout<<"\n\nChemicals updated.\n";
+		cout<<"\n\nTotal  price  to be paid:"<<pr*qty;
+    }
+	else 
+	   cout<<"\n\nInsufficient stock";
+	    getch();
+		
+}
+
+
+void chem::refil(int qty)
+{
+	
+		quant+=qty;
+		cout<<"\n\nChemicals stock updated.";
+	    getch();
+		
+}
+
+
+int chem::stchk(char nm[30])
+{
+	if(strcmp(nm,name)==0)
+	 return 0;
+	else 
+	return 1;
+}
+
+
+void chem::get()
+{
+	cin>>name>>pr>>quant;
+}
+
+
+void chem::get2()
+{
+	cin>>name>>quant;
+}
+
+
+void chem::show()
+{
+	
+	cout<<"\n"<<name<<"\t\t\t"<<quant<<"\t\t\t"<<pr<<'\n';
+}
+
+
+void addnew()
+{
+
+	disp();
+	
+	cout<<"\nEnter the No. of chemicals that you wish to add: ";
+    cin>>n;
+	
+    
+    if (n!=0)
+    {
+	
+	int j,l,sum=0;
+	fout.open("che.dat",ios::binary|ios::app);
+	for(i=0;i<n;i++)
+	
+	{
+	  
+		cout<<"\n\nInput the name, price and the quantity of chemical respectively\n\n";
+	    c.get();
+	    fout.write((char*)&c,sizeof(c));
+        cout<<"\n\nitem updated";
+		cin.get();
+
+    }
+    cout<<"\n\nChemicals added!!";
+    
+
+    fout.close();
+    cin.get();
+    
+    disp();
+    }
+
+	else
+    {
+
+	fout.close();
+	cin.get();
+
+	cout<<"\n\nNo items to be added";
+    getch();
+    }
+}
+
+
+void buy()
+{
+	
+	char temp[100];int qty;
+	int i=0;
+	long pos=0;
+	disp();
+	cout<<"\n\nEnter the chemical's name \n"<<endl;
+	cin>>temp;
+	cout<<"\n\nEnter quantity: \n"<<endl;
+	cin>>qty;
+	fio.open("che.dat",ios::binary|ios::out|ios::in);
+     while(fio)
+     {
+	    pos=fio.tellp();
+	    fio.read((char*)&c,sizeof(c));
+	    if(c.stchk(temp)==0)
+	    {
+		  
+		  c.purchase(qty);
+		  fio.seekp(pos);
+		  fio.write((char*)&c,sizeof(c));
+		  i++;break;
+	    }
+     }
+     
+    
+     if(i!=1)
+       cout<<"\n\n!!Record not found!!";
+     fio.close();
+    cin.get();
+    
+	 disp(); 
+	getch();
+}
+
+
+void disp()
+{
+	int i=1;
+	cout<<"\n==================================================================";
+	cout<<"\n\n=================\tTHE CHEMICALS STOCK IS\t==================";
+	cout<<"\n\n==================================================================\n";
+	cout<<"\n\nCHEMICALS\tSTOCK AVAILABLE\t\t\t PRICE";
+	cout<<"\n\n============================================================\n";	
+	 fin.open("che.dat",ios::binary);
+     while(!fin.eof())
+     {
+	  fin.read((char*)&c,sizeof(c));
+	  if(!fin.eof())
+	  {
+	     if(fin.tellg()<0)
+	     {	i=0; break;}
+	     c.show();
+	  }
+     }
+     if(i==0)
+     {
+	 	cout<<"\n\n\t\t\t!!Empty record room!!";
+	
+     }
+     fin.close();
+    
+}
+
+
+void refill()
+{
+	
+	char temp[100];int qty;
+	int i=0;
+	long pos=0;
+	disp();
+	cout<<"\n\nEnter the chemical name \n"<<endl;
+	cin>>temp;
+	cout<<"\n\nEnter quantity: \n"<<endl;
+	cin>>qty;
+	fio.open("che.dat",ios::binary|ios::out|ios::in);
+     while(fio)
+     {
+	    pos=fio.tellp();
+	    fio.read((char*)&c,sizeof(c));
+	    if(c.stchk(temp)==0)
+	    {
+		  
+		  c.refil(qty);
+		  fio.seekp(pos);
+		  fio.write((char*)&c,sizeof(c));
+		  i++;break;
+	    }
+     }
+     if(i!=1)
+       cout<<"\n\n!!Record not found!!";
+     fio.close();
+    
+    cin.get();
+	 disp(); cin.get();
+    
+}
+
+
+void cremove()
+{
+		
+	 int i=0;
+     char temp[30];
+     cout<<"\n\t\t\t\tNeutralize chemical";
+     disp();
+     cout<<"\n\nEnter the name of the chemical:";
+     cin>>temp;
+     fout.open("temp.dat",ios::binary);
+     fin.open("che.dat",ios::binary);
+     while(!fin.eof())
+     {
+	  fin.read((char*)&c,sizeof(c));
+	  if(!fin.eof())
+	    if(c.stchk(temp)==0)
+	    {
+		  c.show();
+		  
+		  
+		  
+		  cout<<"\n\n\t\t*"<<temp<<"\tneutralized*";
+		  i++;
+	    }
+	    else
+		  fout.write((char*)&c,sizeof(c));
+     }
+     if(i==0)
+       cout<<"\n\n!!Record not found!!";
+     fin.close();
+     fout.close();
+     remove("che.dat");
+     rename("temp.dat","che.dat");
+}
+
+
+
+int main()
+{
+	char pass[10],pass2[10];
+	int i,j;
+	
+	cout<<"\n\n\n\n\n\n\n\n\n\n\n  |============ WELCOME TO CHEMICALS HUB LABORATORY ============|\n";
+	getch();
+	
+	mainmenu:
+		system("cls");
+	cout<<"\n\t\t   CHEMICALS HUB MANAGEMENT SYSTEM\n";	
+	cout<<"=============================================================";
+	cout<<"\n\n\t\t   1. Chemicals Manager Menu\n\n\t\t   2. Customer Menu\n\n\t\t   3. Lab assistants' Menu\n\n\t\t   4. Exit";
+	cout<<"\n\n=========================END OF MAIN MENU========================\n";
+	cout<<"\n\nEnter Your Choice:";
+	cin>>j;
+	if(j==1)
+	{
+	
+	managermenu:
+	system("cls");
+	cout<<"\n=================================================================";
+	cout<<"\n\n\t\t\t    MANAGER MENU\n1. Add new chemicals\n2. Display chemicals stock\n3. Refill\n4. Remove/Neutralize a chemical \n5. Go back to Main menu \n6. Exit";
+	cout<<"\n\n\n==========================END OF MENU=============================";
+	cout<<"\n\n Enter your Choice :\t";
+	cin>>i;
+	if(i==1)
+	{
+		system("cls");
+		addnew();getch();
+	goto managermenu;
+	}
+
+	else if(i==2)
+	{
+		system("cls");
+	disp();getch();
+	goto managermenu;
+	}
+	else if(i==3)
+	{
+		system("cls");
+		refill();goto managermenu;
+	}
+	else if(i==4)
+	{
+		system("cls");
+		cremove();getch();goto managermenu;
+	}
+	else if(i==5)
+	{
+	    goto mainmenu;
+	}
+	else
+	{
+	    exit(0);
+	}
+}
+
+
+else if(j==2)
+	{
+		custmenu:
+	system("cls");
+	cout<<"=================================================================";
+	cout<<"\n\n\t\t\t    CUSTOMER MENU\n1. Purchase chemicals\n2. Display chemicals stock\n3. Go back to main menu\n4. Exit:";
+	cout<<"\n\n\n==========================END OF MENU=============================";
+	cout<<"\n\n Enter your Choice :\t";
+	cin>>i;
+	
+	
+	
+	if (i==1)
+	{
+		system("cls");
+	buy();getch();goto custmenu;
+	}
+	else if(i==2)
+	{
+		system("cls");
+	disp();getch();goto custmenu;
+	}
+	else if(i==3)
+	{
+	    goto mainmenu;
+	}
+	else 
+	{
+		system("cls");
+	cout<<"\n\n\n\t\t\tTHANK YOU FOR VISITING CHEMICALS HUB!!";
+	getch();
+	exit(0);
+}
+	
+}
+if(j==3)
+
+{
+	
+	assistmenu:
+	system("cls");
+	cout<<"=================================================================";
+	cout<<"\n\n\t\t\tLAB ASSISTANTS MENU\n1. Display chemicals stock\n2. Refill chemicals\n3. Go back to main menu\n4. Exit";
+	cout<<"\n\n\n==========================END OF MENU=============================";
+	cout<<"\n\n Enter your Choice :\t";
+	cin>>i;
+	if(i==1)
+	{
+		system("cls");
+	disp();getch();goto assistmenu;
+	}
+	else if(i==2)
+	{
+		system("cls");
+		refill();goto assistmenu;
+	}
+	else if(i==3)
+	{
+	    goto mainmenu;
+	}
+	else 
+	{
+		
+	cout<<"\n\n\n\t\t\tThank You!!";
+	getch();
+	exit(0);
+	}
+}
+
+else if(j==4)
+{
+    
+    cout<<"\t\tThank you!!";  
+    exit(0);
+
+	getch();
+}	
+}
